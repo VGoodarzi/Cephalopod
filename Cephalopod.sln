@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36301.6 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cephalopod", "Cephalopod\Cephalopod\Cephalopod.csproj", "{D0453BFB-D2FB-48BB-B961-A737BBEB4C45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cephalopod.Client", "Cephalopod\Cephalopod.Client\Cephalopod.Client.csproj", "{A16488E7-8582-487A-97DA-62D79E923E99}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D0453BFB-D2FB-48BB-B961-A737BBEB4C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0453BFB-D2FB-48BB-B961-A737BBEB4C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0453BFB-D2FB-48BB-B961-A737BBEB4C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0453BFB-D2FB-48BB-B961-A737BBEB4C45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A16488E7-8582-487A-97DA-62D79E923E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A16488E7-8582-487A-97DA-62D79E923E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A16488E7-8582-487A-97DA-62D79E923E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A16488E7-8582-487A-97DA-62D79E923E99}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {89358106-1735-4D7C-981A-5C4B838DD984}
+	EndGlobalSection
+EndGlobal
