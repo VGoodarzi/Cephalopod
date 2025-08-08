@@ -1,7 +1,12 @@
-using Cephalopod.Client.Pages;
+using MudBlazor.Services;
+using Cephalopod.Client.Contracts;
 using Cephalopod.Components;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add MudBlazor services
+builder.Services.AddMudServices();
+builder.Services.AddScoped<ITranslator, FakeTranslator>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -17,11 +22,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
 }
-
-app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();

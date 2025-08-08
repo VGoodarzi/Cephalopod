@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Cephalopod/Cephalopod.Client/wwwroot/appsettings.Development.json
+/Cephalopod/Cephalopod/Properties/launchSettings.json
+/Cephalopod/Cephalopod/appsettings.Development.json

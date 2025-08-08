@@ -1,0 +1,124 @@
+﻿@inject ITranslator Translator
+@inject ISnackbar Snackbar
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false) )
+@page "/brands"
+
+<MudPopoverProvider />
+<MudSnackbarProvider />
+
+
+<MudTable T="BrandDto"
+          ServerData="ServerReload"
+          Dense="true"
+          Hover="true"
+          Bordered="true"
+          Striped="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@Translator["Brand"]</MudText>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandDto, object>(x => x.Name)">@Translator[nameof(BrandDto.Name)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandDto, object>(x => x.Status)">@Translator[nameof(BrandDto.Status)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandDto, object>(x => x.Description!)">@Translator[nameof(BrandDto.Description)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandDto, object>(x => x.ImageUrl!)">@Translator[nameof(BrandDto.ImageUrl)]</MudTableSortLabel></MudTh>
+        <MudTh>
+            <MudFab Color="Color.Success" Size="Size.Small" StartIcon="@Icons.Material.Filled.Add" />
+        </MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@nameof(BrandDto.Name)">@context.Name</MudTd>
+        <MudTd DataLabel="@nameof(BrandDto.Status)">@Translator[context.Status]</MudTd>
+        <MudTd DataLabel="@nameof(BrandDto.Description)">@context.Description</MudTd>
+        <MudTd DataLabel="@nameof(BrandDto.ImageUrl)">
+            @if (context.ImageUrl is not null)
+            {
+                <MudImage Src="@context.ImageUrl" Alt="No picture" ObjectFit="ObjectFit.Cover" Elevation="25" Width="40" Height="40" Class="rounded-lg" />
+            }
+
+        </MudTd>
+        <MudTd DataLabel="@nameof(BrandDto.Id)">
+            <MudFab Color="Color.Primary" Size="Size.Small" StartIcon="@Icons.Material.Filled.Edit" />
+            <MudFab Color="Color.Warning" Size="Size.Small" StartIcon="@Icons.Material.Filled.ChangeCircle" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="[10, 25, 50, 100]"
+                       RowsPerPageString="Per page:"
+                       AllItemsText="All"
+                       HorizontalAlignment="HorizontalAlignment.Center"
+                       HideRowsPerPage="false"
+                       HidePageNumber="false"
+                       HidePagination="false" />
+    </PagerContent>
+</MudTable>
+
+
+
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        Snackbar.Add("Please check the reactor temperature and try again");
+    }
+
+    private async Task<TableData<BrandDto>> ServerReload(TableState state, CancellationToken cancellationToken)
+    {
+
+        try
+        {
+            var response = await FetchPageFromApi(state.Page + 1, state.PageSize);
+
+            return new TableData<BrandDto>
+            {
+                Items = response.Items,
+                TotalItems = response.TotalCount
+            };
+        }
+        catch (Exception ex)
+        {
+            // Handle errors
+            return new TableData<BrandDto>
+            {
+                Items = new List<BrandDto>(),
+                TotalItems = 0
+            };
+        }
+    }
+
+    private async Task<PagedResponse<BrandDto>> FetchPageFromApi(int pageNumber, int pageSize)
+    {
+        await Task.Delay(500);
+
+        var result = Enumerable.Range((pageNumber - 1) * pageSize, pageSize)
+            .Select(x => new BrandDto
+            {
+                Name = $"برند شماره {x}",
+                Status = x % 3 == 0 ? "Active" : "Inactive",
+                Id = x.ToString(),
+                Description = $"توضیحات برند شماره {x}",
+                ImageUrl = x % 2 == 0 ? "https://www.mudblazor.com/images/tractor.jpg" : null,
+            }).ToList();
+
+        return new PagedResponse<BrandDto>()
+        {
+            Items = result,
+            TotalCount = 100,
+        };
+    }
+
+    private class BrandDto
+    {
+        public required string Id { get; init; }
+        public required string Name { get; init; }
+        public required string Status { get; init; }
+        public string? ImageUrl { get; init; }
+        public string? Description { get; init; }
+    }
+
+    public class PagedResponse<T>
+    {
+        public List<T> Items { get; init; } = new();
+        public int TotalCount { get; init; }
+    }
+}

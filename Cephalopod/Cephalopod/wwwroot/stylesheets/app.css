@@ -1,0 +1,11 @@
+﻿@font-face {
+    font-family: IRANSansX;
+    font-style: normal;
+    font-weight: normal;
+    src: url('../fonts/IranSansX/woff/IRANSansX-Regular.woff') format('woff'), url('../fonts/IranSansX/woff2/IRANSansX-Regular.woff2') format('woff2');
+}
+
+
+body * {
+    font-family: 'IRANSansX', Roboto, Helvetica, Arial, sans-serif !important;
+}
