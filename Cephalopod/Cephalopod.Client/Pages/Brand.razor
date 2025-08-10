@@ -1,11 +1,11 @@
 ﻿@inject ITranslator Translator
 @inject ISnackbar Snackbar
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender:false) )
 @page "/brands"
+@attribute [Authorize]
+@rendermode InteractiveWebAssembly
 
 <MudPopoverProvider />
 <MudSnackbarProvider />
-
 
 <MudTable T="BrandDto"
           ServerData="ServerReload"

@@ -21,4 +21,6 @@ builder.Services.AddMudServices(config =>
 builder.Services.AddSingleton<IUserService, FakeUserService>();
 builder.Services.AddSingleton<ITranslator, FakeTranslator>();
 
+
 await builder.Build().RunAsync();
+

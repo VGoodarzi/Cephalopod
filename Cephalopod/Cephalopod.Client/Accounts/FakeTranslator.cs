@@ -1,4 +1,6 @@
-﻿namespace Cephalopod.Client.Contracts;
+﻿using Cephalopod.Client.Contracts;
+
+namespace Cephalopod.Client.Accounts;
 
 public class FakeTranslator : ITranslator
 {
@@ -18,6 +20,9 @@ public class FakeTranslator : ITranslator
         _fa.Add("Inactive", "غیرفعال");
         _fa.Add("Active", "فعال");
         _fa.Add("Badoomeh", "بادومه");
+        _fa.Add("Login", "ورود");
+        _fa.Add("UserNameOrPhoneNumber", "نام کاربری یا شماره همراه");
+        _fa.Add("Password", "رمز عبور");
     }
 
     public string this[string name] => _fa.GetValueOrDefault(name) ?? name;
