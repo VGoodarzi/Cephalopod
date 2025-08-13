@@ -1,10 +1,8 @@
 ﻿@page "/login"
 @inject ITranslator Translator
 @inject IUserService UserService
+@inject ICacheService CacheService
 @inject NavigationManager NavigationManager
-@rendermode InteractiveWebAssembly
-
-<MudPopoverProvider />
 
 <EditForm Model="LoginModel" OnValidSubmit="async (_) => await OnValidSubmit()" FormName="login">
     <DataAnnotationsValidator />
@@ -39,7 +37,10 @@
 
             var response = await UserService.SignInWithPassword(request, CancellationToken.None);
 
-            NavigationManager.NavigateTo($"/post-login?accessToken={response.AccessToken}&refreshToken={response.RefreshToken}&returnUrl={ReturnUrl}");
+            await CacheService.Set(BlazorConstants.AccessTokenCookieName, response.AccessToken);
+            await CacheService.Set(BlazorConstants.RefreshTokenCookieName, response.RefreshToken);
+
+            NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
         }
 
         this.StateHasChanged();

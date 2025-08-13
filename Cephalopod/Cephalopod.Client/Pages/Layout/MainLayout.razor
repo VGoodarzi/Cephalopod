@@ -1,22 +1,32 @@
 ﻿@inherits LayoutComponentBase
-@inject ITranslator Translator
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider Theme="@_theme" IsDarkMode="_isDarkMode" />
+<MudPopoverProvider />
+<MudSnackbarProvider />
 
 <MudRTLProvider RightToLeft="true">
     <MudLayout>
-        <MudAppBar Elevation="1">
-            <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
-            <MudText Typo="Typo.h5" Class="ml-3">@Translator["Badoomeh"]</MudText>
-        </MudAppBar>
-        <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
-            <NavMenu />
-        </MudDrawer>
-        <MudMainContent Class="pt-16 pa-4">
-            <MudContainer MaxWidth="MaxWidth.Large">
+        <AuthorizeView>
+            <Authorized>
+                <TopNavBar/>
+                <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+                    <NavMenu/>
+                </MudDrawer>
+                <MudMainContent Class="pt-16 pa-4">
+                    <MudContainer MaxWidth="MaxWidth.Large">
+                        @Body
+                    </MudContainer>
+                </MudMainContent>
+            </Authorized>
+            <Authorizing>
+                User is authorizing!!!
+            </Authorizing>
+            <NotAuthorized>
                 @Body
-            </MudContainer>
-        </MudMainContent>
+                <RedirectToLogin />
+            </NotAuthorized>
+        </AuthorizeView>
     </MudLayout>
 </MudRTLProvider>
 

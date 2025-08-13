@@ -1,5 +1,7 @@
+using Cephalopod.Client;
 using Cephalopod.Client.Accounts;
 using Cephalopod.Client.Contracts;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
@@ -18,8 +20,12 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
+builder.Services.AddSingleton<AuthenticationStateProvider, AccessTokenAuthenticationStateProvider>();
+builder.Services.AddSingleton<ICacheService, LocalStorageCacheService>();
 builder.Services.AddSingleton<IUserService, FakeUserService>();
 builder.Services.AddSingleton<ITranslator, FakeTranslator>();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddAuthorizationCore();
 
 
 await builder.Build().RunAsync();

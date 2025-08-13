@@ -1,6 +1,6 @@
 ﻿
-<MudAppBar Color="Color.Primary" Fixed="false">
-    <MudMenu Dense
+<MudAppBar Color="Color.Tertiary" Fixed="false">
+    <MudMenu Dense="true"
              Variant="Variant.Text"
              Size="Size.Medium"
              Color="Color.Inherit"
@@ -16,14 +16,12 @@
 
         <MudDivider />
 
-        <MudMenuItem Href="/"
-                     ForceLoad
+        <MudMenuItem Href="/login"
                      Icon="@Icons.Material.TwoTone.Login"
                      IconColor="Color.Primary"
                      Label="Sign In" />
 
-        <MudMenuItem Href="/"
-                     ForceLoad
+        <MudMenuItem Href="/logout"
                      Icon="@Icons.Material.TwoTone.Logout"
                      IconColor="Color.Primary"
                      Label="Sign Out" />

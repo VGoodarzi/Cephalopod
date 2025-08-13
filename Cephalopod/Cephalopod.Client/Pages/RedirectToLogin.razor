@@ -1,0 +1,12 @@
+﻿@inject NavigationManager NavigationManager
+
+
+@code {
+    public string? RedirectUrl = "/brands";
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.NavigateTo($"/login?redirectUrl={RedirectUrl}");
+    }
+
+}
