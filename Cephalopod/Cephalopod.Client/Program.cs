@@ -5,8 +5,14 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor;
 using MudBlazor.Services;
+using Octopus.Client;
+using Serilog;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.BrowserConsole() 
+    .CreateLogger();
 
 builder.Services.AddMudServices(config =>
 {
@@ -22,10 +28,10 @@ builder.Services.AddMudServices(config =>
 
 builder.Services.AddSingleton<AuthenticationStateProvider, AccessTokenAuthenticationStateProvider>();
 builder.Services.AddSingleton<ICacheService, LocalStorageCacheService>();
-builder.Services.AddSingleton<IUserService, FakeUserService>();
 builder.Services.AddSingleton<ITranslator, FakeTranslator>();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddOctopusServices();
 
 
 await builder.Build().RunAsync();

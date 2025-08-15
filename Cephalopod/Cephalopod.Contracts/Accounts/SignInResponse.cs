@@ -1,4 +1,4 @@
-﻿namespace Cephalopod.Client.Contracts;
+﻿namespace Cephalopod.Contracts.Accounts;
 
 public record SignInResponse
 {

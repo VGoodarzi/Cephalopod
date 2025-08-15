@@ -23,6 +23,7 @@ public class FakeTranslator : ITranslator
         _fa.Add("Login", "ورود");
         _fa.Add("UserNameOrPhoneNumber", "نام کاربری یا شماره همراه");
         _fa.Add("Password", "رمز عبور");
+        _fa.Add("Logout", "خروج");
     }
 
     public string this[string name] => _fa.GetValueOrDefault(name) ?? name;

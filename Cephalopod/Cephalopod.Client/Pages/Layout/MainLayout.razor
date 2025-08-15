@@ -13,7 +13,7 @@
                 <MudDrawer id="nav-drawer" @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
                     <NavMenu/>
                 </MudDrawer>
-                <MudMainContent Class="pt-16 pa-4">
+                <MudMainContent>
                     <MudContainer MaxWidth="MaxWidth.Large">
                         @Body
                     </MudContainer>
@@ -24,7 +24,7 @@
             </Authorizing>
             <NotAuthorized>
                 @Body
-                <RedirectToLogin />
+                <RedirectToLogin ReturnUrl="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" />
             </NotAuthorized>
         </AuthorizeView>
     </MudLayout>

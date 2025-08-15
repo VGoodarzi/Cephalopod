@@ -1,0 +1,20 @@
+﻿@inject NavigationManager NavigationManager
+
+
+@code {
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    protected override void OnInitialized()
+    {
+        var routeUrl = "/login";
+
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+        {
+            routeUrl += $"?returnUrl={ReturnUrl}";
+        }
+
+        NavigationManager.NavigateTo(routeUrl);
+    }
+
+}

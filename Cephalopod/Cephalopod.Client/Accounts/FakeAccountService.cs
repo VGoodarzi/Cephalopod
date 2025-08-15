@@ -1,10 +1,13 @@
 ﻿using Cephalopod.Client.Contracts;
+using Cephalopod.Contracts.Accounts;
+using Cephalopod.Contracts.Utilities;
 
 namespace Cephalopod.Client.Accounts;
 
-public class FakeUserService : IUserService
+public class FakeAccountService : IAccountService
 {
-    public async Task<SignInResponse> SignInWithPassword(SignInWithPasswordRequest request, CancellationToken cancellationToken)
+    public async Task<Result<SignInResponse, string>> SignInWithPassword(
+        SignInWithPasswordRequest request, CancellationToken cancellationToken)
     {
         await Task.Delay(100, cancellationToken);
 
