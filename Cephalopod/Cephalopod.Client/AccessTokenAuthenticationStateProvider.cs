@@ -1,37 +1,57 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Cephalopod.Contracts.Utilities;
 
 namespace Cephalopod.Client;
 
-internal class AccessTokenAuthenticationStateProvider(ICacheService cacheService) : AuthenticationStateProvider
+internal class AccessTokenAuthenticationStateProvider : AuthenticationStateProvider
 {
 
     private readonly JwtSecurityTokenHandler _handler = new();
+    private readonly ICacheService _cacheService;
+    private readonly ILogger<AccessTokenAuthenticationStateProvider> _logger;
+
+    public AccessTokenAuthenticationStateProvider(ICacheService cacheService, ILogger<AccessTokenAuthenticationStateProvider> logger)
+    {
+        _cacheService = cacheService;
+        _logger = logger;
+        //AuthenticationStateChanged += OnAuthenticationStateChanged;
+    }
+
+    //private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    //{
+    //    currentState = await 
+    //}
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        var token = await GetTokenAsync();
+        _logger.LogWarning("user has request");
+        var token = await _cacheService.Get(BlazorConstants.AccessTokenCookieName); 
 
         if (string.IsNullOrWhiteSpace(token))
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
         var jwt = _handler.ReadJwtToken(token);
 
-        if (jwt is null)
+        if (jwt is null || HasExpired(jwt))
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
-
+        
         var identity = new ClaimsIdentity(jwt.Claims, "jwt");
         var principal = new ClaimsPrincipal(identity);
 
         return new AuthenticationState(principal);
     }
 
-    private async Task<string?> GetTokenAsync()
+    private bool HasExpired(JwtSecurityToken jwt)
     {
-        string? token;//= "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwMTk4OTM3MS01OTA4LTc0ZjUtODQ1Yy1jMjNmMzBlZTE5ODUiLCJnaXZlbl9uYW1lIjoiYWRtaW4iLCJmYW1pbHlfbmFtZSI6ImFkbWluIiwibmFtZWlkIjoiYWRtaW4iLCJ1aWQiOiI1ZjRjYjc4Ny01OGRhLTRmODMtOGFhYS1iYjQ4ZTRlMjc4YzMiLCJpcCI6IjEyNy4wLjAuMSIsInJvbGVzIjpbIkdsb2JhbFJlYWQiLCJHbG9iYWxXcml0ZSIsIkJhc2ljIl0sInN1YiI6Iis5ODkxMjEwMDAwMDAiLCJleHAiOjE3NTQ4MjM5MzUsImlzcyI6IkNvcmVJZGVudGl0eSIsImF1ZCI6IkNvcmVJZGVudGl0eVVzZXIifQ.uxfl19BD4yoRmwBUOK_9H2yOTmWyg59Rr00pMbTIGp0";
-        token = await cacheService.Get(BlazorConstants.AccessTokenCookieName);
+        var expClaim = jwt.Claims.SingleOrDefault(c => c.Type == "exp");
+        if (expClaim is null) return false;
 
-        return token;
+        if (!int.TryParse(expClaim.Value, out var epochTime)) return false;
+
+        var expires = DateTimeOffset.FromUnixTimeSeconds(epochTime);
+
+        return expires < DateTimeOffset.Now;
     }
 }

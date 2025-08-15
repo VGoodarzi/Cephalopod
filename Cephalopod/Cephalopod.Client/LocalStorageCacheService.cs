@@ -1,3 +1,4 @@
+using Cephalopod.Contracts.Utilities;
 using Microsoft.JSInterop;
 
 namespace Cephalopod.Client;
