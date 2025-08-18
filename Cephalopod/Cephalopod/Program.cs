@@ -1,4 +1,4 @@
-using Cephalopod.Client;
+using Cephalopod.Client.Pages;
 
 var builder = WebApplication.CreateBuilder(args);
 

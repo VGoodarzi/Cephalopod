@@ -1,132 +1,40 @@
 ﻿@page "/login"
-@inject ITranslator Translator
-@inject IAccountManager AccountManager
-@inject ICacheService CacheService
-@inject ISnackbar Snackbar
-@inject NavigationManager NavigationManager
-@inject IAuthenticationService AuthenticationService
-@inject ILogger<Login> Logger
-
-<MudContainer MaxWidth="MaxWidth.Small" Class="py-16">
-    <EditForm Model="LoginModel" OnValidSubmit="async (_) => await OnValidSubmit()" FormName="login">
-        <DataAnnotationsValidator />
-        <MudCard Class="mx-auto" Elevation="10">
-            <MudCardHeader>
-                <CardHeaderContent>
-                    <MudText Typo="Typo.h6">@Translator["Badoomeh"]</MudText>
-                </CardHeaderContent>
-                <CardHeaderActions>
-                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Default" />
-                </CardHeaderActions>
-            </MudCardHeader>
-            <MudCardContent>
-                <MudTextField Label="@Translator["UserNameOrPhoneNumber"]" @bind-Value="LoginModel.Username" For="@(() => LoginModel.Username)" />
-                <MudTextField Label="@Translator["Password"]" Class="mt-3" @bind-Value="LoginModel.Password" For="@(() => LoginModel.Password)" InputType="InputType.Password" />
-            </MudCardContent>
-            <MudCardActions>
-                <MudButton ButtonType="ButtonType.Submit"
-                           Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Disabled="_isLoading">
-                    @if (_isLoading)
-                    {
-                        <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Class="" Indeterminate="true" />
-                    }
-                    @Translator["Login"]
-
-                </MudButton>
-            </MudCardActions>
-        </MudCard>
-    </EditForm>
-
-</MudContainer>
 
 
-
+@if (SignInMethod == SignInMethodType.Otp)
+{
+    <SendOtp OnSignInSucceeded="OnSignInSucceeded"
+             SignInMethodChanged="SignInMethodChanged" />
+}
+else
+{
+    <SignInWithPassword OnSignInSucceeded="OnSignInSucceeded"
+                        SignInMethodChanged="SignInMethodChanged" />
+}
 
 @code {
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; init; }
 
-    [SupplyParameterFromForm]
-    private LoginRequest LoginModel { get; init; } = new();
+    private SignInMethodType SignInMethod { get; set; }
 
-    private bool _isLoading = false;
-
-
-    protected override async Task OnInitializedAsync()
+    void SignInMethodChanged(SignInMethodType signInMethod)
     {
-        if (await AuthenticationService.IsAuthenticated())
-        {
-            NavigationManager.NavigateTo("/");
-            return;
-        }
-
-        await TryLoginWithRefreshToken();
+        SignInMethod = signInMethod;
     }
 
-
-    private async Task TryLoginWithRefreshToken()
-    {
-        var refreshToken = await CacheService.Get(BlazorConstants.RefreshTokenCookieName);
-
-        var request = new SignInWithRefreshTokenRequest(refreshToken);
-
-        var response = await AccountManager.SignIn(request, CancellationToken.None);
-
-        if (response.IsSuccess)
-        {
-            await StoreThenNavigateToHome(response.Value);
-            Logger.LogInformation("Sign with refresh token has succeeded");
-        }
-        else
-        {
-            Logger.LogWarning("Sign with refresh token has failed, message: '{message}'", response.Error.Title);
-        }
-    }
-
-    private async Task OnValidSubmit()
-    {
-        _isLoading = true;
-
-        var request = LoginModel.ToRequest();
-
-        var response = await AccountManager.SignIn(request, CancellationToken.None);
-
-        if (response.IsSuccess)
-        {
-            await StoreThenNavigateToHome(response.Value);
-        }
-        else
-        {
-            Snackbar.Add(response.Error.Title, Severity.Error);
-        }
-
-        this.StateHasChanged();
-
-        _isLoading = false;
-    }
-
-    private async Task StoreThenNavigateToHome(SignInResponse response)
+    async Task OnSignInSucceeded(SignInResponse response)
     {
         await CacheService.Set(BlazorConstants.AccessTokenCookieName, response.AccessToken);
         await CacheService.Set(BlazorConstants.RefreshTokenCookieName, response.RefreshToken);
+        await AuthenticationNotify.LoggedIn(response.ExpiredAt);
 
-        NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+        NavigationManager.NavigateTo(ReturnUrl ?? "/");
     }
 
-    private class LoginRequest
+    public enum SignInMethodType
     {
-        [Required] public string Username { get; set; } = string.Empty;
-        [Required] public string Password { get; set; } = string.Empty;
-
-        public SignInWithPasswordRequest ToRequest()
-        {
-            return new()
-            {
-                Password = Password,
-                UserName = Username
-            };
-        }
+        Password = 1,
+        Otp = 2
     }
 }

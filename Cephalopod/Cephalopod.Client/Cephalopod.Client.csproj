@@ -13,6 +13,9 @@
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.*" />
 		<PackageReference Include="Serilog.Sinks.BrowserConsole" Version="8.0.0" />
+		<PackageReference Include="Blazored.FluentValidation" Version="2.2.0" />
+		<PackageReference Include="FluentValidation" Version="12.0.0" />
+		<PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.0.0" />
 		<PackageReference Include="MudBlazor" Version="8.*" />
 	</ItemGroup>
 

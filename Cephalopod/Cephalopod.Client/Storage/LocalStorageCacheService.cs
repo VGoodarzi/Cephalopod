@@ -1,7 +1,7 @@
 using Cephalopod.Contracts.Utilities;
 using Microsoft.JSInterop;
 
-namespace Cephalopod.Client;
+namespace Cephalopod.Client.Storage;
 
 internal class LocalStorageCacheService(IJSRuntime jsRuntime) : ICacheService
 {

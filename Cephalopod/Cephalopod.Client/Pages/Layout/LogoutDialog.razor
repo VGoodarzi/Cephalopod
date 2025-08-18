@@ -1,0 +1,29 @@
+﻿@inject ITranslator Translator
+@inject IAuthenticationNotify AuthenticationNotify
+@inject ICacheService CacheService
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@Translator["DoYouWantToExit"]</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="(_) => MudDialog?.Cancel()">@Translator["Cancel"]</MudButton>
+        <MudButton Color="Color.Error" 
+                   Variant="Variant.Filled" 
+                   OnClick="(_) => SignOut()">@Translator["Exit"]</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance? MudDialog { get; set; }
+
+    private async Task SignOut()
+    {
+        await CacheService.Delete(BlazorConstants.RefreshTokenCookieName);
+        await CacheService.Delete(BlazorConstants.AccessTokenCookieName);
+        await AuthenticationNotify.LoggedOut();
+
+        MudDialog?.Close(DialogResult.Ok(true));
+    }
+}

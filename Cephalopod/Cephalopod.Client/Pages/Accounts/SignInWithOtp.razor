@@ -1,0 +1,189 @@
+﻿
+<EditForm Model="InputModel" OnValidSubmit="OnValidSubmit" FormName="signInWithotp">
+    <FluentValidationValidator />
+    <MudCard Class="mx-auto" Elevation="10">
+        <MudCardHeader>
+            <CardHeaderContent>
+                <MudText Typo="Typo.h6">@Translator["Badoomeh"]</MudText>
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Default" />
+            </CardHeaderActions>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudTextField Clearable
+                          Label="@($"{Translator["OtpCodeTo"]} {PhoneNumber}")"
+                          @bind-Value="InputModel.Code"
+                          For="@(() => InputModel.Code)"
+                          MaxLength="5" />
+        </MudCardContent>
+        <MudCardContent Class="pt-0 pb-0">
+            <MudLink OnClick="() => PhoneNumberWillChange.InvokeAsync()"
+                     Typo="Typo.overline"
+                     Underline="Underline.None">@Translator["ChangePhoneNumber"]</MudLink>
+            <MudSpacer />
+            <MudLink OnClick="ChangeToSignInWIthPassword"
+                     Typo="Typo.overline"
+                     Underline="Underline.None">@Translator["SignInWithPassword"]</MudLink>
+        </MudCardContent>
+        <MudCardActions>
+            <MudGrid>
+                @if (_otpHasExpired)
+                {
+                    <MudItem xs="12">
+                        <MudButton ButtonType="ButtonType.Button"
+                                   OnClick="SendOtpAgain"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Medium"
+                                   FullWidth="true"
+                                   Disabled="!_otpHasExpired">
+                            @if (!_otpHasExpired)
+                            {
+                                <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                @Translator["SendOtpAgain"]
+                            }
+                        </MudButton>
+                    </MudItem>
+                }
+                else
+                {
+                    <MudItem xs="12" Style="text-align:center;">
+                        <MudText>@($"{_expiredTime.Minutes:D2}:{_expiredTime.Seconds:D2}")</MudText>
+                    </MudItem>
+                    <MudItem xs="12" Class="pt-2">
+                        <MudButton ButtonType="ButtonType.Submit"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Size="Size.Medium"
+                                   FullWidth="true"
+                                   Disabled="_isLoading">
+                            @if (_isLoading)
+                            {
+                                <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Indeterminate="true" />
+                            }
+                            else
+                            {
+                                @Translator["Confirm"]
+                            }
+                        </MudButton>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardActions>
+    </MudCard>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private SignInWithOtpModel InputModel { get; init; } = new();
+
+    [Parameter]
+    public required string PhoneNumber { get; init; }
+
+    [Parameter]
+    public required DateTime OtpExpiredAt { get; set; }
+
+    [Parameter]
+    public required EventCallback<Login.SignInMethodType> SignInMethodChanged { get; set; }
+
+    [Parameter]
+    public required EventCallback<bool> PhoneNumberWillChange { get; set; }
+
+    [Parameter]
+    public required EventCallback<SignInResponse> OnSignInSucceeded { get; set; }
+
+    private bool _isLoading = false;
+    private Timer _timer = null!;
+    private TimeSpan _expiredTime;
+    private bool _otpHasExpired = false;
+
+    protected override void OnInitialized()
+    {
+        _timer = new();
+        _timer.Interval = 500;
+        _timer.Elapsed += async (_, _) =>
+        {
+            _expiredTime = OtpExpiredAt - DateTime.Now;
+
+            if (_expiredTime > TimeSpan.Zero)
+            {
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            _expiredTime = TimeSpan.Zero;
+            _otpHasExpired = true;
+            _timer.Enabled = false;
+            await InvokeAsync(StateHasChanged);
+        };
+        _timer.Enabled = true;
+    }
+
+    private async Task ChangeToSignInWIthPassword(MouseEventArgs _)
+        => await SignInMethodChanged.InvokeAsync(Login.SignInMethodType.Password);
+
+    private async Task SendOtpAgain(MouseEventArgs _)
+    {
+        _isLoading = true;
+
+        var request = new SendOtpRequest(PhoneNumber.ToIranianPhoneNumber());
+
+        var result = await AccountManager.SendOtp(request, CancellationToken.None);
+
+        if (result.IsSuccess)
+        {
+            OtpExpiredAt = DateTime.Now.Add(result.Value.Expires);
+            _expiredTime = result.Value.Expires;
+            _otpHasExpired = false;
+            _timer.Enabled = true;
+        }
+        else
+        {
+            Snackbar.Add(result.Error.Title, Severity.Error);
+        }
+        _isLoading = false;
+
+        StateHasChanged();
+    }
+
+    private async Task OnValidSubmit(EditContext _)
+    {
+        _isLoading = true;
+
+        var request = InputModel.ToRequest(PhoneNumber);
+
+        var result = await AccountManager.SignIn(request, CancellationToken.None);
+
+        if (result.IsSuccess)
+        {
+            await OnSignInSucceeded.InvokeAsync(result.Value);
+        }
+        else
+        {
+            Snackbar.Add(result.Error.Title, Severity.Error);
+        }
+        _isLoading = false;
+
+        StateHasChanged();
+    }
+
+    public class SignInWithOtpModel
+    {
+        public string Code { get; set; } = string.Empty;
+
+        public SignInWithOtpRequest ToRequest(string phoneNumber) => new(phoneNumber.ToIranianPhoneNumber(), Code);
+
+        public class SignInWithOtpModelValidator : AbstractValidator<SignInWithOtpModel>
+        {
+            public SignInWithOtpModelValidator(ITranslator translator)
+            {
+                RuleFor(m => m.Code)
+                    .Matches(@"^\d{5}").WithMessage(translator[BlazorConstants.PleaseEnterCorrectOtpCode]);
+            }
+        }
+    }
+}

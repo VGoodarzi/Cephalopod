@@ -1,0 +1,49 @@
+﻿@inject IAuthenticationNotify AuthenticationNotify
+@inject NavigationManager NavigationManager
+@inject ICacheService CacheService
+@inject IAccountManager AccountManager
+
+
+@code {
+    [Parameter]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!await TryLoginWithRefreshToken())
+        {
+            var routeUrl = "/login";
+
+            if (!string.IsNullOrWhiteSpace(ReturnUrl))
+            {
+                routeUrl += $"?returnUrl={ReturnUrl}";
+            }
+
+            NavigationManager.NavigateTo(routeUrl);
+        }
+    }
+
+    private async Task<bool> TryLoginWithRefreshToken()
+    {
+        var refreshToken = await CacheService.Get(BlazorConstants.RefreshTokenCookieName);
+
+        var request = new SignInWithRefreshTokenRequest(refreshToken);
+
+        var response = await AccountManager.SignIn(request, CancellationToken.None);
+
+        if (response.IsSuccess)
+        {
+            await StoreThenNotifyOthers(response.Value);
+        }
+
+        return response.IsSuccess;
+    }
+
+    private async Task StoreThenNotifyOthers(SignInResponse response)
+    {
+        await CacheService.Set(BlazorConstants.AccessTokenCookieName, response.AccessToken);
+        await CacheService.Set(BlazorConstants.RefreshTokenCookieName, response.RefreshToken);
+        await AuthenticationNotify.LoggedIn(response.ExpiredAt);
+    }
+
+}

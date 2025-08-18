@@ -1,0 +1,19 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+
+<MudLayout>
+    <AuthorizeView>
+        <Authorized>
+            <RedirectToHome />
+        </Authorized>
+        <NotAuthorized>
+            <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="py-16">
+                @Body
+            </MudContainer>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudLayout>
+
+@code {
+
+}

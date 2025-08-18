@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+@inject NavigationManager NavigationManager
+
+<MudLayout>
+    <AuthorizeView>
+        <Authorized>
+            <TopNavBar />
+            <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="3" Fixed="true">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.Large">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </Authorized>
+        <NotAuthorized>
+            <RedirectToLogin ReturnUrl="@NavigationManager.ToBaseRelativePath(NavigationManager.Uri)" />
+        </NotAuthorized>
+    </AuthorizeView>
+</MudLayout>
+
+@code {
+
+}

@@ -1,0 +1,115 @@
+﻿@if (_otpHasSent)
+{
+    <SignInWithOtp PhoneNumber="@InputModel.PhoneNumber"
+                   OtpExpiredAt="_otpExpiredAt"
+                   PhoneNumberWillChange="() => _otpHasSent = false"
+                   OnSignInSucceeded="OnSignInSucceeded"
+                   SignInMethodChanged="SignInMethodChanged" />
+}
+else
+{
+    <EditForm Model="InputModel" OnValidSubmit="OnValidSubmit" FormName="sendOtp">
+        <FluentValidationValidator />
+        <MudCard Class="mx-auto" Elevation="10">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@Translator["Badoomeh"]</MudText>
+                </CardHeaderContent>
+                <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Login" Color="Color.Default" />
+                </CardHeaderActions>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudTextField Label="@Translator["PhoneNumber"]"
+                              Clearable
+                              @bind-Value="InputModel.PhoneNumber"
+                              For="@(() => InputModel.PhoneNumber)" />
+            </MudCardContent>
+            <MudCardContent Class="pt-0 pb-0">
+                <MudLink OnClick="ChangeToSignInWithPassword"
+                         Typo="Typo.overline"
+                         Underline="Underline.None">@Translator["SignInWithPassword"]</MudLink>
+            </MudCardContent>
+            <MudCardActions>
+                <MudButton ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Medium"
+                           FullWidth="true"
+                           Disabled="_isLoading">
+                    @if (_isLoading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Color="Color.Inherit" Indeterminate="true" />
+                    }
+                    else
+                    {
+                        @Translator["SendOtp"]
+                    }
+
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+    </EditForm>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; init; }
+
+    [SupplyParameterFromForm]
+    private SendOtpModel InputModel { get; init; } = new();
+
+    private DateTime _otpExpiredAt;
+
+    [Parameter]
+    public required EventCallback<Login.SignInMethodType> SignInMethodChanged { get; set; }
+
+    [Parameter]
+    public required EventCallback<SignInResponse> OnSignInSucceeded { get; set; }
+
+    private bool _otpHasSent = false;
+    private bool _isLoading = false;
+
+    private void ChangeToSignInWithPassword(MouseEventArgs _)
+        => SignInMethodChanged.InvokeAsync(Login.SignInMethodType.Password);
+
+
+    private async Task OnValidSubmit(EditContext _)
+    {
+        _isLoading = true;
+
+        var request = InputModel.ToRequest();
+
+        var result = await AccountManager.SendOtp(request, CancellationToken.None);
+
+        if (result.IsSuccess)
+        {
+            _otpExpiredAt = DateTime.Now.Add(result.Value.Expires);
+            _otpHasSent = true;
+        }
+        else
+        {
+            Snackbar.Add(result.Error.Title, Severity.Error);
+        }
+
+        this.StateHasChanged();
+        _isLoading = false;
+    }
+
+    public class SendOtpModel
+    {
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public SendOtpRequest ToRequest() => new(PhoneNumber.ToIranianPhoneNumber());
+
+        public class SendOtpModelValidator : AbstractValidator<SendOtpModel>
+        {
+            public SendOtpModelValidator(ITranslator translator)
+            {
+                RuleFor(m => m.PhoneNumber)
+                    .Matches(@"^(\+?98|0)9\d{9}$").WithMessage(translator[BlazorConstants.PleaseEnterCorrectPhoneNumber]);
+            }
+        }
+    }
+
+}
