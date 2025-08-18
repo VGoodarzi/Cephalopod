@@ -1,6 +1,6 @@
 ﻿namespace Cephalopod.Client;
 
-public class BlazorConstants
+internal class BlazorConstants
 {
     public const string AuthenticationScheme = "jwt";
     public const string AccessTokenCookieName = "access-token";

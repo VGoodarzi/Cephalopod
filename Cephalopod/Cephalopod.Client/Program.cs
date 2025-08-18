@@ -1,5 +1,6 @@
-using Cephalopod.Client;
 using Cephalopod.Client.Accounts;
+using Cephalopod.Client.Authentication;
+using Cephalopod.Client.Storage;
 using Cephalopod.Contracts.Accounts;
 using Cephalopod.Contracts.Utilities;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -12,7 +13,7 @@ using Serilog;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
 Log.Logger = new LoggerConfiguration()
-    .WriteTo.BrowserConsole() 
+    .WriteTo.BrowserConsole()
     .CreateLogger();
 
 builder.Services.AddMudServices(config =>
@@ -27,7 +28,11 @@ builder.Services.AddMudServices(config =>
     config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
-builder.Services.AddSingleton<AuthenticationStateProvider, AccessTokenAuthenticationStateProvider>();
+builder.Services.AddSingleton<AccessTokenAuthenticationStateProvider>();
+builder.Services.AddSingleton<AuthenticationStateProvider>(sp 
+    => sp.GetRequiredService<AccessTokenAuthenticationStateProvider>());
+builder.Services.AddSingleton<IAuthenticationNotify>(sp 
+    => sp.GetRequiredService<AccessTokenAuthenticationStateProvider>());
 builder.Services.AddSingleton<ICacheService, LocalStorageCacheService>();
 builder.Services.AddSingleton<ITranslator, FakeTranslator>();
 builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();

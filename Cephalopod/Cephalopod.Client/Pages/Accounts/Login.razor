@@ -3,9 +3,7 @@
 @inject IAccountManager AccountManager
 @inject ICacheService CacheService
 @inject ISnackbar Snackbar
-@inject NavigationManager NavigationManager
-@inject IAuthenticationService AuthenticationService
-@inject ILogger<Login> Logger
+@inject IAuthenticationNotify AuthenticationNotify
 
 <MudContainer MaxWidth="MaxWidth.Small" Class="py-16">
     <EditForm Model="LoginModel" OnValidSubmit="async (_) => await OnValidSubmit()" FormName="login">
@@ -54,36 +52,7 @@
     private bool _isLoading = false;
 
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (await AuthenticationService.IsAuthenticated())
-        {
-            NavigationManager.NavigateTo("/");
-            return;
-        }
 
-        await TryLoginWithRefreshToken();
-    }
-
-
-    private async Task TryLoginWithRefreshToken()
-    {
-        var refreshToken = await CacheService.Get(BlazorConstants.RefreshTokenCookieName);
-
-        var request = new SignInWithRefreshTokenRequest(refreshToken);
-
-        var response = await AccountManager.SignIn(request, CancellationToken.None);
-
-        if (response.IsSuccess)
-        {
-            await StoreThenNavigateToHome(response.Value);
-            Logger.LogInformation("Sign with refresh token has succeeded");
-        }
-        else
-        {
-            Logger.LogWarning("Sign with refresh token has failed, message: '{message}'", response.Error.Title);
-        }
-    }
 
     private async Task OnValidSubmit()
     {
@@ -95,7 +64,7 @@
 
         if (response.IsSuccess)
         {
-            await StoreThenNavigateToHome(response.Value);
+            await StoreThenNotifyOthers(response.Value);
         }
         else
         {
@@ -103,16 +72,14 @@
         }
 
         this.StateHasChanged();
-
         _isLoading = false;
     }
 
-    private async Task StoreThenNavigateToHome(SignInResponse response)
+    private async Task StoreThenNotifyOthers(SignInResponse response)
     {
         await CacheService.Set(BlazorConstants.AccessTokenCookieName, response.AccessToken);
         await CacheService.Set(BlazorConstants.RefreshTokenCookieName, response.RefreshToken);
-
-        NavigationManager.NavigateTo(ReturnUrl ?? "/", forceLoad: true);
+        await AuthenticationNotify.LoggedIn(response.ExpiredAt);
     }
 
     private class LoginRequest

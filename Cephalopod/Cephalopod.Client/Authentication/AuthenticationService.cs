@@ -2,7 +2,7 @@ using Cephalopod.Contracts.Accounts;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Cephalopod.Client;
+namespace Cephalopod.Client.Authentication;
 
 internal class AuthenticationService(
     AuthenticationStateProvider authenticationStateProvider

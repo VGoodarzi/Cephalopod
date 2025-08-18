@@ -1,11 +1,17 @@
 ﻿@inject ITranslator Translator
 
 <MudNavMenu>
-    <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">@Translator["Home"]</MudNavLink>
+    <MudNavLink Href="/" 
+                Match="NavLinkMatch.All" 
+                Icon="@Icons.Material.Filled.Home">@Translator["Home"]</MudNavLink>
 
-    <MudNavLink Href="/counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">@Translator["Counter"]</MudNavLink>
+    <MudNavLink Href="/counter" 
+                Match="NavLinkMatch.Prefix" 
+                Icon="@Icons.Material.Filled.Add">@Translator["Counter"]</MudNavLink>
 
-    <MudNavLink Href="/brands" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.BrandingWatermark">@Translator["Brand"]</MudNavLink>
+    <MudNavLink Href="/brands" 
+                Match="NavLinkMatch.Prefix" 
+                Icon="@Icons.Material.Filled.BrandingWatermark">@Translator["Brand"]</MudNavLink>
 
 </MudNavMenu>
 

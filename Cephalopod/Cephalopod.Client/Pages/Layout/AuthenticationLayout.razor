@@ -1,0 +1,17 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+
+<MudLayout>
+    <AuthorizeView>
+        <Authorized>
+            <RedirectToHome />
+        </Authorized>
+        <NotAuthorized>
+            @Body
+        </NotAuthorized>
+    </AuthorizeView>
+</MudLayout>
+
+@code {
+
+}

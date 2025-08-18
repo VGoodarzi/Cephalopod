@@ -9,4 +9,5 @@ public record SignInResponse
     public required string PhoneNumber { get; init; }
     public required string UserId { get; init; }
     public bool HasPassword { get; init; }
+    public DateTimeOffset ExpiredAt => DateTimeOffset.FromUnixTimeSeconds(ExpireIn);
 }

@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+@layout MainLayout
+
+<MudLayout>
+    <AuthorizeView>
+        <Authorized>
+            <TopNavBar />
+            <MudDrawer Open="true" ClipMode="DrawerClipMode.Always" Elevation="2">
+                <NavMenu />
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.Large">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </Authorized>
+        <NotAuthorized>
+            <RedirectToLogin />
+        </NotAuthorized>
+    </AuthorizeView>
+</MudLayout>
+@code {
+
+}

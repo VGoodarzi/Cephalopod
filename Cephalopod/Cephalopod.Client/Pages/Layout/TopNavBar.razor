@@ -1,7 +1,10 @@
 ﻿@inject ITranslator Translator
 @inject IAuthenticationService AuthenticationService
+@inject IAuthenticationNotify AuthenticationNotify
+@inject ICacheService CacheService
+
 <MudAppBar Color="Color.Primary" Fixed="false">
-    <MudIconButton Icon="@Icons.Material.Rounded.MoreVert" Color="Color.Inherit"/>
+    <MudIconButton Icon="@Icons.Material.Rounded.MoreVert" Color="Color.Inherit" />
 
     <MudSpacer />
 
@@ -11,12 +14,12 @@
              Size="Size.Medium"
              Color="Color.Inherit"
              Icon="@Icons.Material.Rounded.AccountCircle">
-        
+
         <MudMenuItem Href="#"
                      Icon="@Icons.Material.TwoTone.Person"
                      IconColor="Color.Primary"
                      Label="@_name" />
-       
+
         <MudDivider />
 
         <MudMenu StartIcon="@Icons.Material.TwoTone.Settings"
@@ -24,14 +27,14 @@
                  Label="Settings">
             <MudMenuItem Icon="@Icons.Material.TwoTone.DarkMode"
                          IconColor="Color.Secondary"
-                         Label="Dark Theme"/>
+                         Label="Dark Theme" />
         </MudMenu>
 
 
-        <MudMenuItem Href="/logout"
+        <MudMenuItem OnClick="async _ => await SignOut()"
                      Icon="@Icons.Material.TwoTone.ExitToApp"
                      IconColor="Color.Primary"
-                     Label="@Translator["Logout"]"/>
+                     Label="@Translator["Logout"]" />
     </MudMenu>
 </MudAppBar>
 
@@ -41,6 +44,13 @@
     protected override async Task OnInitializedAsync()
     {
         _name = await AuthenticationService.GetUsername();
+    }
+
+    private async Task SignOut()
+    {
+        await CacheService.Delete(BlazorConstants.RefreshTokenCookieName);
+        await CacheService.Delete(BlazorConstants.AccessTokenCookieName);
+        await AuthenticationNotify.LoggedOut();
     }
 
 }
