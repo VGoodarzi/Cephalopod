@@ -1,0 +1,77 @@
+﻿@page "/brands"
+
+
+<MudTable T="BrandItemResponse"
+          ServerData="ServerReload"
+          Dense="true"
+          Hover="true"
+          Bordered="true"
+          Striped="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">@Translator["Brand"]</MudText>
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandItemResponse, object>(x => x.ImageUrl!)">@Translator[nameof(BrandItemResponse.ImageUrl)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandItemResponse, object>(x => x.Name)">@Translator[nameof(BrandItemResponse.Name)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandItemResponse, object>(x => x.Status)">@Translator[nameof(BrandItemResponse.Status)]</MudTableSortLabel></MudTh>
+        <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<BrandItemResponse, object>(x => x.Description!)">@Translator[nameof(BrandItemResponse.Description)]</MudTableSortLabel></MudTh>
+        <MudTh>@Translator["Actions"]</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="@Translator[nameof(BrandItemResponse.ImageUrl)]">
+            <MudImage Src="@(context.ImageUrl ?? BlazorConstants.NoPictureUrl)" ObjectFit="ObjectFit.Cover" Elevation="5" Width="100" Height="100" Class="rounded-lg" />
+        </MudTd>
+        <MudTd DataLabel="@Translator[nameof(BrandItemResponse.Name)]">@context.Name</MudTd>
+        <MudTd DataLabel="@Translator[nameof(BrandItemResponse.Status)]">@Translator[context.Status]</MudTd>
+        <MudTd DataLabel="@Translator[nameof(BrandItemResponse.Description)]">@context.Description</MudTd>
+        <MudTd DataLabel="@nameof(BrandItemResponse.Id)">
+            <MudLink Href="@($"/brands/{context.Id}")">
+                <MudTooltip Text="@Translator[BlazorConstants.Edit]">
+                    <MudIcon Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" />
+                </MudTooltip>
+            </MudLink>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager PageSizeOptions="[10, 25, 50, 100]"
+                       RowsPerPageString="Per page:"
+                       AllItemsText="All"
+                       HorizontalAlignment="HorizontalAlignment.Center"
+                       HideRowsPerPage="false"
+                       HidePageNumber="false"
+                       HidePagination="false" />
+    </PagerContent>
+</MudTable>
+
+
+
+
+@code {
+
+    private async Task<TableData<BrandItemResponse>> ServerReload(TableState state, CancellationToken cancellationToken)
+    {
+        var request = new GetBrandRequest
+        {
+            PageSize = state.PageSize,
+            PageNumber = state.Page + 1
+        };
+
+        var result = await BrandService.GetBrands(request, cancellationToken);
+
+        if (result.IsSuccess)
+            return new()
+            {
+                Items = result.Value.Items,
+                TotalItems = result.Value.TotalCount
+            };
+
+        Snackbar.Add(result.Error.Title, Severity.Error);
+
+        return new()
+        {
+            Items = [],
+            TotalItems = 0
+        };
+
+    }
+}

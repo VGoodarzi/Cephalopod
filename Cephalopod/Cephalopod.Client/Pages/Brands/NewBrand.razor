@@ -1,0 +1,76 @@
+﻿@page "/brands/new"
+
+<MudText Typo="Typo.h5">ایجاد برند جدید</MudText>
+
+<br />
+
+<EditForm Model="InputModel" OnValidSubmit="OnValidSubmit" FormName="createBrand">
+    <MudGrid>
+        <MudItem xs="6">
+            <MudTextField Label="@Translator[nameof(CreateBrandModel.Name)]"
+                          For="() => InputModel.Name"
+                          @bind-Value="InputModel.Name"
+                          Variant="Variant.Outlined"
+                          Required="true" />
+        </MudItem>
+        <MudItem xs="12">
+            <MudTextField Label="@Translator[nameof(CreateBrandModel.Description)]"
+                          For="() => InputModel.Description"
+                          @bind-Value="InputModel.Description"
+                          Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem lg="4" md="8" sm="12" xs="12">
+            <MudCard Outlined="true" Square="true">
+                <MudCardMedia Image="@(InputModel.ImageUrl ?? BlazorConstants.NoPictureUrl)" Height="300" />
+                <MudCardActions Class="justify-center">
+                    <MudFileUpload T="IBrowserFile" FilesChanged="UploadImage">
+                        <ActivatorContent>
+                            <MudFab Color="Color.Secondary"
+                                    StartIcon="@Icons.Material.Filled.Image"
+                                    Label="@Translator[BlazorConstants.UploadImage]" />
+                        </ActivatorContent>
+                    </MudFileUpload>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+    [SupplyParameterFromForm]
+    private CreateBrandModel InputModel { get; init; } = new();
+
+    private async Task UploadImage(IBrowserFile? file)
+    {
+        if (file is null) return;
+
+        await using var stream = file.OpenReadStream();
+
+        var request = new UploadImageRequest("brands", stream);
+
+        var result = await ImageService.Upload(request, CancellationToken.None);
+
+        if (result.IsFailure)
+        {
+            Snackbar.Add(result.Error.Title, Severity.Error);
+        }
+        else
+        {
+            InputModel.ImageUrl = result.Value.AbsolutePath;
+        }
+
+        StateHasChanged();
+    }
+
+    private Task OnValidSubmit(EditContext _)
+    {
+        return Task.CompletedTask;
+    }
+
+    public class CreateBrandModel
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; }
+        public string? Description { get; set; }
+    }
+}

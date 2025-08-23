@@ -1,11 +1,13 @@
 using Cephalopod.Contracts.Accounts;
+using Cephalopod.Contracts.Utilities;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Cephalopod.Client.Authentication;
 
 internal class AuthenticationService(
-    AuthenticationStateProvider authenticationStateProvider
+    AuthenticationStateProvider authenticationStateProvider,
+    ICacheService cacheService
 ) : IAuthenticationService
 {
     public async Task<bool> IsAuthenticated()
@@ -24,8 +26,9 @@ internal class AuthenticationService(
             ?.Value;
     }
 
-    private async Task<AuthenticationState> GetCurrentState()
-    {
-        return await authenticationStateProvider.GetAuthenticationStateAsync();
-    }
+    public async Task<string?> GetAccessToken() 
+        => await cacheService.Get(BlazorConstants.AccessTokenCookieName);
+
+    private async Task<AuthenticationState> GetCurrentState() 
+        => await authenticationStateProvider.GetAuthenticationStateAsync();
 }

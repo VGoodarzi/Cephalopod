@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 namespace Octopus.Client.Accounts;
 
 internal class OctopusAccountManager(
-    IHttpClientFactory httpClientFactory,
+    HttpClient httpClient,
     ILoggerFactory loggerFactory,
     ITranslator translator)
-    : BaseOctopusClient(httpClientFactory, loggerFactory, translator), IAccountManager
+    : BaseOctopusClient(httpClient, loggerFactory, translator), IAccountManager
 {
     public async Task<Result<SignInResponse, ProblemDetails>> SignIn(
         SignInWithPasswordRequest request, CancellationToken cancellationToken)
@@ -45,11 +45,10 @@ internal class OctopusAccountManager(
         return await PutAsync(request, url, cancellationToken);
     }
 
-    public async Task<Result<ProblemDetails>> SetPassword(SetPasswordRequest request, string temporaryAccessToken,
+    public Task<Result<ProblemDetails>> SetPassword(SetPasswordRequest request, string temporaryAccessToken,
         CancellationToken cancellationToken)
     {
-        WithTemporaryAccessToken(temporaryAccessToken);
-        return await SetPassword(request, cancellationToken);
+        return SetPassword(request, cancellationToken);
     }
 
     public async Task<Result<ProblemDetails>> ChangePassword(ChangePasswordRequest request,

@@ -46,6 +46,7 @@ public class FakeTranslator : ITranslator
         _fa.Add(BlazorConstants.PasswordsHasChanged, "رمز عبور با موفقیت تغییر یافت");
         _fa.Add(BlazorConstants.Actions, "عملیات");
         _fa.Add(BlazorConstants.Edit, "ویرایش");
+        _fa.Add(BlazorConstants.UploadImage, "بارگزاری تصویر");
     }
 
     public string this[string name] => _fa.GetValueOrDefault(name) ?? name;
